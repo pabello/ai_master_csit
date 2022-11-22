@@ -92,15 +92,21 @@ def get_best_solutions_list(solutions: list):
 
 
 if __name__ == "__main__":
-    try:
-        dimmension = int(input("How many cities are there?\n"))
-    except:
-        print('This is not a number... Bye.')
-        exit()
-    start_time = time()
+    dimmension = 9
+    max_distance = 5
     
-    space = utils.generate_graph_2d(dimmension)
-    space = utils.make_graph_asymmetric(space)  # TODO: make assymetric graph optional
+    # try:
+    #     dimmension = int(input("How many cities are there?\n"))
+    # except:
+    #     print('This is not a number... Bye.')
+    #     exit()
+    print(f'Searching for a solution in {dimmension}-cities graph.')
+    start_time = time()
+    cities = utils.generate_cities(dimmension, max_distance)
+    space = utils.get_symmetric_graph(cities)
+    print(space)
+    # exit()
+    # space = utils.make_graph_asymmetric(space)
     time_generated = time()
     
     solutions = find_solutions(space, OrderType.DFS)
@@ -125,3 +131,42 @@ if __name__ == "__main__":
     # for path in lvl_1:
     #     get_child_paths(path, space)
     #     print()
+    
+    exit()
+    #####=====----- TEST CASES -----=====#####
+    dimmension = 9
+    cities = utils.generate_cities(dimmension)
+    
+    # Generate a symmetric graph of the cities
+    space = utils.get_symmetric_graph(cities)
+    
+    # Symmetric, fully connected, brute force bfs, x cities
+    start_time = time()
+    solutions = find_solutions(space, OrderType.BFS)
+    finish_time = time()
+    with open('results.txt', 'a') as file:
+        file.write(f'{finish_time - start_time:.4f} seconds - Symmetric, fully connected, brute force bfs, {dimmension} cities.\r\n')
+
+    # Symmetric, fully connected, brute force bfs, x cities
+    start_time = time()
+    solutions = find_solutions(space, OrderType.DFS)
+    finish_time = time()
+    with open('results.txt', 'a') as file:
+        file.write(f'{finish_time - start_time:.4f} seconds - Symmetric, fully connected, brute force dfs, {dimmension} cities.\r\n')
+    
+    # Generate an asymmetric graph basing on the symetric one and the cities
+    space = utils.get_asymmetric_graph(space)
+    
+    # Asymmetric, fully connected, brute force bfs, x cities
+    start_time = time()
+    solutions = find_solutions(space, OrderType.BFS)
+    finish_time = time()
+    with open('results.txt', 'a') as file:
+        file.write(f'{finish_time - start_time:.4f} seconds - Asymmetric, fully connected, brute force bfs, {dimmension} cities.\r\n')
+
+    # Asymmetric, fully connected, brute force bfs, x cities
+    start_time = time()
+    solutions = find_solutions(space, OrderType.DFS)
+    finish_time = time()
+    with open('results.txt', 'a') as file:
+        file.write(f'{finish_time - start_time:.4f} seconds - Asymmetric, fully connected, brute force dfs, {dimmension} cities.\r\n')
