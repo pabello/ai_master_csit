@@ -12,9 +12,14 @@ def generate_cities(qty: int, max_offset:int = 100):
     """
     cities = []
     for _ in range(qty):
-        coordinates = np.random.randint(low=-max_offset, high=max_offset+1, size=3)
+        while True:
+            coordinates = np.random.randint(low=-max_offset, high=max_offset+1, size=3)
+            coordinates[2] = 0
+            if coordinates not in cities:
+                cities.append(coordinates)
+                break
+    for coordinates in cities:
         coordinates[2] = np.random.randint(low=-50, high=51)
-        cities.append(coordinates)
     return cities
 
 
@@ -57,6 +62,18 @@ def make_graph_asymmetric(graph: np.ndarray):
             graph[row][col] *= weight
             graph[col][row] *= (2 - weight)
     return graph
+
+
+def remove_connections(graph: np.ndarray, connections_percentage: float = 10):
+    if connections_percentage > 1:
+        connections_percentage /= 100
+    remove_qty = graph.size * connections_percentage // 1
+    for _ in range(remove_qty):
+        while True:
+            coords = np.random.random_integers(0, graph.shape[0], 2)
+            if coords[0] != coords[1] and graph[coords[0]][coords[1]] != 0:
+                graph[coords[0]][coords[1]] = graph[coords[1]][coords[0]] = 0
+                break
 
 
 if __name__ == '__main__':

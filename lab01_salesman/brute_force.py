@@ -93,7 +93,7 @@ def get_best_solutions_list(solutions: list):
 
 if __name__ == "__main__":
     dimmension = 9
-    max_distance = 5
+    max_distance = 100
     
     # try:
     #     dimmension = int(input("How many cities are there?\n"))
