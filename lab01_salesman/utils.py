@@ -13,7 +13,7 @@ def generate_cities(qty: int, max_offset:int = 100):
     cities = []
     for _ in range(qty):
         while True:
-            coordinates = np.random.randint(low=-max_offset, high=max_offset+1, size=3)
+            coordinates = np.random.randint(low=-max_offset, high=max_offset+1, size=3).tolist()
             coordinates[2] = 0
             if coordinates not in cities:
                 cities.append(coordinates)

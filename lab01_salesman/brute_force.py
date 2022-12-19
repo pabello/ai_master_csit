@@ -91,15 +91,47 @@ def get_best_solutions_list(solutions: list):
     return best_solutions
 
 
+def use_case_description(dimmension:int, fully_connected:bool, symmetric:bool, order_type:OrderType):
+    message = ""
+    message += f"{dimmension:2d} {order_type.name} "
+    if fully_connected:
+        message += "FC "
+    else:
+        message += "NFC"
+    if symmetric:
+        message += "SYMMETRIC"
+    else:
+        message += "ASYMMETRIC"
+    return message
+
+
+def run_benchmark(solution_space:np.ndarray, order_type:OrderType, fully_connected:bool, symmetric:bool):
+    space = deepcopy(solution_space)
+    print('enter')
+    start_time = time()
+    solutions = find_solutions(space, order_type)
+    finish_time = time()
+
+    message = use_case_description(space.shape[0], fully_connected, symmetric, order_type)
+    message += f" {finish_time - start_time:.4f} seconds."
+    print(message)
+
+    with open('results.txt', 'a') as file:
+        file.write(message)
+
+    pass
+
+
 if __name__ == "__main__":
-    dimmension = 9
+    dimmension = 7
     max_distance = 100
-    
+
     # try:
     #     dimmension = int(input("How many cities are there?\n"))
     # except:
     #     print('This is not a number... Bye.')
     #     exit()
+    
     print(f'Searching for a solution in {dimmension}-cities graph.')
     start_time = time()
     cities = utils.generate_cities(dimmension, max_distance)
@@ -107,6 +139,14 @@ if __name__ == "__main__":
     print(space)
     # exit()
     # space = utils.make_graph_asymmetric(space)
+
+    run_benchmark(space, OrderType.DFS, True, True)
+    exit()
+
+
+
+
+
     time_generated = time()
     
     solutions = find_solutions(space, OrderType.DFS)
@@ -140,13 +180,6 @@ if __name__ == "__main__":
     # Generate a symmetric graph of the cities
     space = utils.get_symmetric_graph(cities)
     
-    # Symmetric, fully connected, brute force bfs, x cities
-    start_time = time()
-    solutions = find_solutions(space, OrderType.BFS)
-    finish_time = time()
-    with open('results.txt', 'a') as file:
-        file.write(f'{finish_time - start_time:.4f} seconds - Symmetric, fully connected, brute force bfs, {dimmension} cities.\r\n')
-
     # Symmetric, fully connected, brute force bfs, x cities
     start_time = time()
     solutions = find_solutions(space, OrderType.DFS)
