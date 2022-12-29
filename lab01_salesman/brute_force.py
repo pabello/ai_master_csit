@@ -58,7 +58,7 @@ def find_solutions(space: np.array, order: OrderType):
     
     total_calculations = count_calculations(space.shape[0])
     print(f'A total of {total_calculations} calculations will be made.')
-    percent = total_calculations // 100
+    percent = total_calculations / 100
     bar_resolution = 2
     calculations_count = 0
     
@@ -70,7 +70,7 @@ def find_solutions(space: np.array, order: OrderType):
                 solutions.append(child_paths[0])
             else:
                 solution_space += child_paths
-        pc_complete = calculations_count // percent
+        pc_complete = int(calculations_count // percent)
         hashes = '#' * (pc_complete // bar_resolution)
         dashes = '-' * ((100 // bar_resolution) - (pc_complete // bar_resolution))
         
@@ -91,13 +91,13 @@ def get_best_solutions_list(solutions: list):
     return best_solutions
 
 
-def use_case_description(dimmension:int, fully_connected:bool, symmetric:bool, order_type:OrderType):
+def usecase_description(dimmension:int, fully_connected:bool, symmetric:bool, order_type:OrderType):
     message = ""
     message += f"{dimmension:2d} {order_type.name} "
     if fully_connected:
         message += "FC "
     else:
-        message += "NFC"
+        message += "NFC "
     if symmetric:
         message += "SYMMETRIC"
     else:
@@ -112,20 +112,38 @@ def run_benchmark(solution_space:np.ndarray, order_type:OrderType, fully_connect
     solutions = find_solutions(space, order_type)
     finish_time = time()
 
-    message = use_case_description(space.shape[0], fully_connected, symmetric, order_type)
+    message = usecase_description(space.shape[0], fully_connected, symmetric, order_type)
     message += f" {finish_time - start_time:.4f} seconds."
     print(message)
 
     with open('results.txt', 'a') as file:
-        file.write(message)
+        file.write(message + "\r\n")
 
     pass
+
+
+def get_results_full_range(limit:int = 9):
+    for i in range(3, limit+1):
+        cities = utils.generate_cities(i)
+        space = utils.get_symmetric_graph(cities)
+        run_benchmark(space, OrderType.DFS, True, True)
+        run_benchmark(space, OrderType.DFS, True, False)
+        run_benchmark(space, OrderType.DFS, False, True)
+        run_benchmark(space, OrderType.DFS, False, False)
+        run_benchmark(space, OrderType.BFS, True, True)
+        run_benchmark(space, OrderType.BFS, True, False)
+        run_benchmark(space, OrderType.BFS, False, True)
+        run_benchmark(space, OrderType.BFS, False, False)
+
+
 
 
 if __name__ == "__main__":
     dimmension = 7
     max_distance = 100
 
+    get_results_full_range(dimmension)
+    exit()
     # try:
     #     dimmension = int(input("How many cities are there?\n"))
     # except:
