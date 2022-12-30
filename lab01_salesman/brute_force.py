@@ -106,40 +106,38 @@ def usecase_description(dimmension:int, fully_connected:bool, symmetric:bool, or
 
 
 def run_benchmark(solution_space:np.ndarray, order_type:OrderType, fully_connected:bool, symmetric:bool):
-    space = deepcopy(solution_space)
-    print('enter')
     start_time = time()
-    solutions = find_solutions(space, order_type)
+    solutions = find_solutions(solution_space, order_type)
     finish_time = time()
 
-    message = usecase_description(space.shape[0], fully_connected, symmetric, order_type)
+    message = usecase_description(solution_space.shape[0], fully_connected, symmetric, order_type)
     message += f" {finish_time - start_time:.4f} seconds."
     print(message)
 
     with open('results.txt', 'a') as file:
         file.write(message + "\r\n")
 
-    pass
-
 
 def get_results_full_range(limit:int = 9):
-    for i in range(3, limit+1):
+    nfc_percent = 20
+    for i in range(5, limit+1):
         cities = utils.generate_cities(i)
-        space = utils.get_symmetric_graph(cities)
-        run_benchmark(space, OrderType.DFS, True, True)
-        run_benchmark(space, OrderType.DFS, True, False)
-        run_benchmark(space, OrderType.DFS, False, True)
-        run_benchmark(space, OrderType.DFS, False, False)
-        run_benchmark(space, OrderType.BFS, True, True)
-        run_benchmark(space, OrderType.BFS, True, False)
-        run_benchmark(space, OrderType.BFS, False, True)
-        run_benchmark(space, OrderType.BFS, False, False)
-
-
+        fc_sym_space = utils.get_symmetric_graph(cities)
+        fc_asym_space = utils.get_asymmetric_graph(fc_sym_space, cities)
+        nfc_sym_space = utils.remove_connections(fc_sym_space, nfc_percent)
+        nfc_asym_space = utils.remove_connections(fc_asym_space, nfc_percent)
+        run_benchmark(fc_sym_space, OrderType.DFS, True, True)
+        run_benchmark(fc_asym_space, OrderType.DFS, True, False)
+        run_benchmark(nfc_sym_space, OrderType.DFS, False, True)
+        run_benchmark(nfc_asym_space, OrderType.DFS, False, False)
+        run_benchmark(fc_sym_space, OrderType.BFS, True, True)
+        run_benchmark(fc_asym_space, OrderType.BFS, True, False)
+        run_benchmark(nfc_sym_space, OrderType.BFS, False, True)
+        run_benchmark(nfc_asym_space, OrderType.BFS, False, False)
 
 
 if __name__ == "__main__":
-    dimmension = 7
+    dimmension = 9
     max_distance = 100
 
     get_results_full_range(dimmension)

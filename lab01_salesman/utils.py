@@ -19,7 +19,7 @@ def generate_cities(qty: int, max_offset:int = 100):
                 cities.append(coordinates)
                 break
     for coordinates in cities:
-        coordinates[2] = np.random.randint(low=-50, high=51)
+        coordinates[2] = np.random.randint(low=0, high=51)
     return cities
 
 
@@ -27,7 +27,18 @@ def get_2d_distance(city1:list, city2:list):
     return ((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2) ** (1/2)
 
 
-def get_symmetric_graph(cities: list):
+def get_symmetric_graph(cities: list) -> np.ndarray:
+    """Accepts a list of cities and creates a graph in a
+    numpy array.
+
+    Args:
+        cities (list): List of cities, each item is another city
+        with 3 variables: x_coord, y_coord, z_coord (height level)
+
+    Returns:
+        np.ndarray: graph of connections (costs of traveling from
+        one city to another)
+    """
     dimmension = len(cities)
     graph = np.zeros((dimmension, dimmension))
 
@@ -38,7 +49,19 @@ def get_symmetric_graph(cities: list):
     return graph
 
 
-def get_asymmetric_graph(graph_2d:np.ndarray, cities:list):
+def get_asymmetric_graph(graph_2d:np.ndarray, cities:list) -> np.ndarray:
+    """Takes a graph, coppies it, basing on information from cities list
+    assigns weights to all connections. The connections's costs may be
+    multiplied by 0.9 or 1.1 depending on whether the city is placed
+    lower or higher.
+
+    Args:
+        graph (np.ndarray): template graph
+        cities (list): list of cities
+
+    Returns:
+        np.ndarray: new instance with changes applied
+    """
     dimmension = len(cities)
     graph_3d = deepcopy(graph_2d)
     for row_id in range(dimmension):
@@ -54,26 +77,41 @@ def get_asymmetric_graph(graph_2d:np.ndarray, cities:list):
     return graph_3d
 
 
-def make_graph_asymmetric(graph: np.ndarray):
-    size = graph.shape[0]
-    for row in range(size):
-        for col in range(row, size):
-            weight = choice([.9, 1, 1.1])
-            graph[row][col] *= weight
-            graph[col][row] *= (2 - weight)
-    return graph
+def remove_connections(graph: np.ndarray, connections_percentage: float = 20) -> np.ndarray:
+    """Accepts a graph and returns a copy of it with removed percentage of connections
+    between nodes. Makes sure the graph has no dead end cities.
 
+    Args:
+        graph (np.ndarray): graph to copy
+        connections_percentage (float, optional): percentage of connections
+        to remove. Defaults to 10.
 
-def remove_connections(graph: np.ndarray, connections_percentage: float = 10):
+    Returns:
+        np.ndarray: new instance of a graph, with removed connections
+    """
     if connections_percentage > 1:
         connections_percentage /= 100
-    remove_qty = graph.size * connections_percentage // 1
-    for _ in range(remove_qty):
-        while True:
-            coords = np.random.random_integers(0, graph.shape[0], 2)
-            if coords[0] != coords[1] and graph[coords[0]][coords[1]] != 0:
-                graph[coords[0]][coords[1]] = graph[coords[1]][coords[0]] = 0
+    remove_qty = int((graph.size - graph.shape[0]) * connections_percentage)
+
+    all_cities_reachable = False
+    while not all_cities_reachable:  # safety loop to make sure the graph has no dead end cities
+        all_cities_reachable = True
+        result_graph:np.ndarray = deepcopy(graph)
+        for _ in range(remove_qty):
+            while True:
+                coords = np.random.random_integers(0, result_graph.shape[0]-1, 2)
+                if coords[0] != coords[1] and result_graph[coords[0]][coords[1]] != 0:
+                    result_graph[coords[0]][coords[1]] = result_graph[coords[1]][coords[0]] = 0
+                    break
+        for row_id in range(dim := result_graph.shape[0]):
+            available_paths = 0
+            for col_id in range(dim):
+                if result_graph[row_id][col_id] != 0:
+                    available_paths += 1
+            if available_paths < 2:
+                all_cities_reachable = False
                 break
+    return result_graph
 
 
 if __name__ == '__main__':
