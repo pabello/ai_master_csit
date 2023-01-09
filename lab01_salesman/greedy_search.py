@@ -1,5 +1,6 @@
 import numpy as np
 import utils
+from time import time
 
 
 def search_with_nn(space: np.array):
@@ -10,17 +11,30 @@ def search_with_nn(space: np.array):
         current_cost = 0.0
         
         for _ in range(len(space) - 1):
-            possible_steps = [(node, space[current_path[-1]][node]) for node
-                            in range(len(space)) if node not in current_path
-                            and space[current_path[-1]][node] != 0]
-            
+            possible_steps = [(node, space[current_path[-1]][node]) 
+                            for node in range(len(space))
+                            if node not in current_path
+                               and space[current_path[-1]][node] != 0]
             next_step = sorted(possible_steps, key=lambda x: x[1])[0]
             current_path.append(next_step[0])
             current_cost += next_step[1]
-            
+
+        current_cost += space[current_path[-1]][starting_point]
+        current_path.append(starting_point)
+        
         solutions.append((current_path, current_cost))
     
     return solutions
+
+
+def greedy_search(space: np.array):
+    s_time = time()
+    solutions = search_with_nn(space)
+    e_time = time()
+    solutions_sorted = sorted(solutions, key=lambda x: x[1])
+    best_cost = solutions_sorted[0][1]
+    elapsed_time = e_time - s_time
+    return best_cost, elapsed_time
 
 
 if __name__ == "__main__":

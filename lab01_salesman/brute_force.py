@@ -5,8 +5,6 @@ from enum import Enum
 
 from concurrent.futures import ThreadPoolExecutor
 
-np.random.seed(6)
-
 
 class OrderType(Enum):
     BFS = 1
@@ -54,6 +52,25 @@ def find_solutions(space: np.array, order: OrderType):
             previous_percentage = pc_complete
             print(f'[{hashes}{dashes}] {pc_complete}%', end='\r')
     print()
+    return solutions
+
+
+def quiet_find_solutions(space: np.array, order: OrderType):
+    if order == OrderType.BFS:
+        take_index = 0
+    if order == OrderType.DFS:
+        take_index = -1
+    
+    solution_space = [[[x], 0] for x in range(space.shape[0])]
+    solutions = []
+    
+    while solution_space:
+        child_paths = utils.get_child_paths(solution_space.pop(take_index), space)
+        if child_paths:
+            if len(child_paths) == 1 and len(child_paths[0][0]) > space.shape[0]:
+                solutions.append(child_paths[0])
+            else:
+                solution_space += child_paths
     return solutions
 
 
@@ -135,7 +152,24 @@ def get_results_full_range_async(min_cities:int=5, max_cities:int = 9):
     pool.shutdown()
 
 
+def brute_force(space:np.ndarray):
+    s_time = time()
+    solutions = quiet_find_solutions(space, OrderType.DFS)
+    e_time = time()
+    dfs_best_cost = sorted(solutions, key=lambda x: x[1])[0][1]
+    dfs_time = e_time - s_time
+
+    s_time = time()
+    solutions = quiet_find_solutions(space, OrderType.BFS)
+    e_time = time()
+    bfs_best_cost = sorted(solutions, key=lambda x: x[1])[0][1]
+    bfs_time = e_time - s_time
+
+    return {"dfs":(dfs_best_cost, dfs_time), "bfs":(bfs_best_cost, bfs_time)}
+
+
 if __name__ == "__main__":
+    np.random.seed(6)
     dimmension = 9
     max_distance = 100
     get_results_full_range(min_cities=11, max_cities=11)

@@ -64,32 +64,33 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
             
         if not best_solution or state_queue[0][1] < best_solution[1]:
             best_solution = state_queue[0]
-    print(best_solution)
-    print(f"needed to do {return_count} returns")
-    return best_solution
+    return best_solution[1]
     
-"""_summary_
+def heuristic_search(space:np.ndarray):
+    s_time = time()
+    avg_best_cost = graph_search_heurictic(space, Heuristic.n_average_heuristic)
+    e_time = time()
+    n_avg_time = e_time - s_time
+    
+    s_time = time()
+    min_best_cost = graph_search_heurictic(space, Heuristic.n_min_cost_heuristic)
+    e_time = time()
+    n_min_time = e_time - s_time
 
-Args:
-    state (list): list containing current path (node list) as the first element, its cost as the second,
-        and approximation of total cost as the third element
-    space (np.array): array of costs of all interconnected nodes
-    heuristic (function): cost approximation function
+    return {"avg":(avg_best_cost, n_avg_time), "min":(min_best_cost, n_min_time)}
 
-Returns:
-    list: _description_
-"""
 
-np.random.seed(6)
-cities = utils.generate_cities(9)
-graph = utils.get_symmetric_graph(cities)
+if __name__ == "__main__":
+    np.random.seed(6)
+    cities = utils.generate_cities(9)
+    graph = utils.get_symmetric_graph(cities)
 
-start_time = time()
-graph_search_heurictic(graph, Heuristic.n_average_heuristic)
-end_time = time()
-print(f"{(end_time - start_time):0.6f} seconds")
-print()
-start_time = time()
-graph_search_heurictic(graph, Heuristic.n_min_cost_heuristic)
-end_time = time()
-print(f"{(end_time - start_time):0.6f} seconds")
+    start_time = time()
+    graph_search_heurictic(graph, Heuristic.n_average_heuristic)
+    end_time = time()
+    print(f"{(end_time - start_time):0.6f} seconds")
+    print()
+    start_time = time()
+    graph_search_heurictic(graph, Heuristic.n_min_cost_heuristic)
+    end_time = time()
+    print(f"{(end_time - start_time):0.6f} seconds")
