@@ -24,8 +24,9 @@ class Heuristic(Enum):
 
 def get_child_states(state: list, space: np.array, heuristic:Heuristic) -> list:
     children = []
+    current_node = state[0][-1][0]
     visited_nodes = [node[0] for node in state[0]]
-    possible_steps = [_ for _ in range(space.shape[0]) if _ not in visited_nodes]
+    possible_steps = [node for node in range(space.shape[0]) if node not in visited_nodes and space[current_node][node] != 0]
     
     if not possible_steps:
         if len(visited_nodes) == space.shape[0]:
@@ -47,8 +48,8 @@ def get_child_states(state: list, space: np.array, heuristic:Heuristic) -> list:
 
 
 def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
-    """
-    state_definition = [[cities_visited], cost_so_far, total_cost_estimation]
+    """                       0               1                 2
+    state_definition: [[cities_visited], cost_so_far, total_cost_estimation]
     """
     return_count = 0
     best_solution = None
@@ -56,12 +57,19 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
     for starting_state in starting_states:
         state_queue = get_child_states(starting_state, space, heuristic)
         state_queue.sort(key=lambda state:state[2])
+        unsolvable = False
         
         while not state_queue[0][1] == state_queue[0][2]:  # checking if solution was reached for this starting point
-            state_queue += get_child_states(state_queue.pop(0), space, heuristic)
+            try:
+                state_queue += get_child_states(state_queue.pop(0), space, heuristic)
+            except:
+                unsolvable = True
+                break
             state_queue.sort(key=lambda state:state[2])
             return_count += 1
             
+        if unsolvable:
+            continue
         if not best_solution or state_queue[0][1] < best_solution[1]:
             best_solution = state_queue[0]
     return best_solution[1]

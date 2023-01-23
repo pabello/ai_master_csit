@@ -90,6 +90,8 @@ def remove_connections(graph: np.ndarray, connections_percentage: float = 20) ->
     """
     if connections_percentage > 1:
         connections_percentage /= 100
+    connections_percentage /= 2  # Requires division by 2 as we remove them symmetricaly
+    
     remove_qty = int((graph.size - graph.shape[0]) * connections_percentage)
 
     all_cities_reachable = False
