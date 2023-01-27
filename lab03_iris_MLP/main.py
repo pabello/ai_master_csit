@@ -16,8 +16,11 @@ class MultilayerPerceptron:
     def __relu_derivative(inputs:np.ndarray):
         return np.array([int(x) for x in (inputs > 0).tolist()])
     
-    def __softmax_derivative(softmax_outputs:np.ndarray, reference:np.ndarray):
-        return (softmax_outputs - reference) * softmax_outputs
+    def __softmax_derivative(softmax_outputs:np.ndarray):
+        subtractor = [[softmax_outputs[i] if i==j else 0 for i in range(len(softmax_outputs))] for j in range(len(softmax_outputs))]
+        predictions = np.matrix(softmax_outputs)
+        return -predictions.T @ predictions - subtractor
+        
 
     # Error functions
     def __MSE(inputs:np.ndarray):
@@ -168,14 +171,19 @@ class MultilayerPerceptron:
     #     self.data = pd.DataFrame.to_numpy(df)
 
 
+
 if __name__ == "__main__":
     np.random.seed(6)
     
     network = MultilayerPerceptron(4, 3, (5, 6))
+    # print(network.weights)
     
     ff = network.feed_forward(np.array([3.14, 2.17, 1.04, 1.43]))
     error = network.error_function(ff)
     
-    print(ff)
+    # print(ff)
+    # print()
+    # print(error)
+
     print()
-    print(error)
+    print(MultilayerPerceptron.softmax_derivative(np.array([0.69, .21, .10]), np.array([1, 0, 0])))

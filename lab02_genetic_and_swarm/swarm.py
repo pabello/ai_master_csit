@@ -1,12 +1,7 @@
-# from random import random
 import numpy as np
 import pandas as pd
 import plotly.express as px
-from copy import copy, deepcopy
-
-import matplotlib.pyplot as plt
-
-from math import sin
+from copy import copy
 
 
 def fitness(position:np.ndarray[float, float]):
@@ -46,7 +41,7 @@ class Particle:
             self.personal_best = {"position": self.position, "value":func_value}
             if func_value < GLOBAL_BEST["value"]:
                 GLOBAL_BEST = {"position": self.position, "value":func_value}
-                print(f"New global minimum: --==## {GLOBAL_BEST['value']} | {GLOBAL_BEST['position']} ##==--")
+                # print(f"New global minimum: --==## {GLOBAL_BEST['value']} | {GLOBAL_BEST['position']} ##==--")
     
     def __str__(self) -> str:
         return f"Position: {self.position} | Personal best: {self.personal_best} | Velocity: {self.velocity}"
@@ -55,11 +50,8 @@ class Particle:
 def funkcja_1(swarm:list[Particle], df:pd.DataFrame):
     current_state_df = pd.DataFrame((particle.position for particle in swarm), columns=("x_axis", "y_axis"))
     current_state_df["velocity"] = [copy(particle.velocity) for particle in swarm]
-    # print(current_state_df)
     current_state_df["iter"] = 0
     df = pd.concat([df, current_state_df], ignore_index=True)
-    # print(df)
-    # exit()
     
     for iter in range(ITERATIONS):
         velocity_change_rate = 1 - (iter/ITERATIONS)
@@ -76,13 +68,15 @@ def funkcja_1(swarm:list[Particle], df:pd.DataFrame):
 
 
 if __name__ == "__main__":
-    np.random.seed(6)
+    # np.random.seed(6)
     
     linspace = np.linspace(-PLAIN_MAX_COORD, PLAIN_MAX_COORD, POINTS_LIN_COUNT)
     swarm = [Particle(np.array((x, y))) for x in linspace for y in linspace]
     
     df = pd.DataFrame()
     df = funkcja_1(swarm, df)
+
+    print(GLOBAL_BEST)
     
     fig = px.scatter(df, x="x_axis", y="y_axis", animation_frame="iter")
     fig.layout.updatemenus[0].buttons[0].args[1]["frame"]["duration"] = 250

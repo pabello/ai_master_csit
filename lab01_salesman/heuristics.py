@@ -10,7 +10,7 @@ class Heuristic(Enum):
         cost_so_far = state[1]  # this already includes the cost for a step that is being processed
         steps_done = len(state[0][1:])
         
-        steps_left = total_cities_number - steps_done
+        steps_left = total_cities_number - steps_done  # this includes the way back to the first city
         average_cost = cost_so_far / steps_done
         return steps_left * average_cost
 
@@ -27,15 +27,6 @@ def get_child_states(state: list, space: np.array, heuristic:Heuristic) -> list:
     current_node = state[0][-1][0]
     visited_nodes = [node[0] for node in state[0]]
     possible_steps = [node for node in range(space.shape[0]) if node not in visited_nodes and space[current_node][node] != 0]
-    
-    if not possible_steps:
-        if len(visited_nodes) == space.shape[0]:
-            way_back_cost = space[visited_nodes[-1]][visited_nodes[0]]
-            state[0].append( (visited_nodes[0], way_back_cost) )
-            state[1] += way_back_cost
-            state[2] = state[1]
-            return [state]
-        return None
     
     for x in possible_steps:
         step_cost = space[visited_nodes[-1]][x]
@@ -57,22 +48,28 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
     for starting_state in starting_states:
         state_queue = get_child_states(starting_state, space, heuristic)
         state_queue.sort(key=lambda state:state[2])
-        unsolvable = False
         
-        while not state_queue[0][1] == state_queue[0][2]:  # checking if solution was reached for this starting point
-            try:
-                state_queue += get_child_states(state_queue.pop(0), space, heuristic)
-            except:
-                unsolvable = True
+        while len(state_queue):
+            best_state = state_queue.pop(0)
+            if len(best_state[0]) > space.shape[0]:
+                if not best_solution or best_state[1] < best_solution[1]:
+                    best_solution = deepcopy(best_state)
                 break
+            elif len(best_state[0]) == space.shape[0]:
+                first_node = best_state[0][0][0]
+                last_node = best_state[0][-1][0]
+                way_back_cost = space[last_node][first_node]
+                if way_back_cost != 0:
+                    best_state[0].append( (first_node, way_back_cost) )
+                    best_state[1] += way_back_cost
+                    best_state[2] = best_state[1]
+                    state_queue.append(best_state)
+            else:
+                child_states = get_child_states(best_state, space, heuristic)
+                state_queue += child_states
+                return_count += 1
             state_queue.sort(key=lambda state:state[2])
-            return_count += 1
-            
-        if unsolvable:
-            continue
-        if not best_solution or state_queue[0][1] < best_solution[1]:
-            best_solution = state_queue[0]
-    return best_solution[1]
+    return best_solution[1] if isinstance(best_solution, list) else "Unsolvable"
     
 def heuristic_search(space:np.ndarray):
     s_time = time()

@@ -10,7 +10,7 @@ with open("results.md", "w") as file:
     file.write(f"| Dimmension | Smmetric | Fully Connected | Algorithm | Solution | Time |\n")
     file.write(f"|------------|----------|-----------------|-----------|----------|------|\n")
 
-
+seed(6)
 max_cities = 8
 for dimmension in range(5, max_cities + 1):
     cities = utils.generate_cities(dimmension)
