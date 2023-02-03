@@ -24,10 +24,14 @@ def search_with_nn(space: np.array):
             current_path.append(next_step[0])
             current_cost += next_step[1]
 
+        if space[current_path[-1]][starting_point]:
+            current_cost += space[current_path[-1]][starting_point]
+            current_path.append(starting_point)
+        else:
+            unsolvable = True
+
         if unsolvable:
             continue
-        current_cost += space[current_path[-1]][starting_point]
-        current_path.append(starting_point)
         
         solutions.append((current_path, current_cost))
     

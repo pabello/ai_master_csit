@@ -4,6 +4,8 @@ from time import time
 from enum import Enum
 from copy import deepcopy
 
+from random import seed
+
 
 class Heuristic(Enum):
     def n_average_heuristic(state:list, total_cities_number:int):
@@ -14,12 +16,13 @@ class Heuristic(Enum):
         average_cost = cost_so_far / steps_done
         return steps_left * average_cost
 
-    def n_min_cost_heuristic(state:list, total_cities_number:int):
+    def n_min_cost_heuristic(state:list, total_cities_number:int, global_min:float):
         min_cost = min(step[1] for step in state[0][1:])  # we need to skip the first city as its cost is 0
         steps_done = len(state[0][1:])
         
         steps_left = total_cities_number - steps_done
-        return steps_left * min_cost
+        # return steps_left * min_cost
+        return steps_left * global_min
 
 
 def get_child_states(state: list, space: np.array, heuristic:Heuristic) -> list:
@@ -52,6 +55,8 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
         while len(state_queue):
             best_state = state_queue.pop(0)
             if len(best_state[0]) > space.shape[0]:
+                if best_state[2] <= best_state[1]:
+                    print("estimation was better")
                 if not best_solution or best_state[1] < best_solution[1]:
                     best_solution = deepcopy(best_state)
                 break
@@ -69,7 +74,9 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
                 state_queue += child_states
                 return_count += 1
             state_queue.sort(key=lambda state:state[2])
+    print(return_count)
     return best_solution[1] if isinstance(best_solution, list) else "Unsolvable"
+    # return best_solution[1], return_count, [city[0] for city in best_solution[0]] if isinstance(best_solution, list) else "Unsolvable"
     
 def heuristic_search(space:np.ndarray):
     s_time = time()
@@ -88,14 +95,24 @@ def heuristic_search(space:np.ndarray):
 if __name__ == "__main__":
     np.random.seed(6)
     cities = utils.generate_cities(9)
+    cities = [[89, -87, 18], [-26, -49, 25], [60, 1, 30], [-79, 8, 21], [-28, 69, 37], [58, -39, 7], [12, -1, 18], [-74, -43, 15], [19, -9, 7]]
     graph = utils.get_symmetric_graph(cities)
+    utils.remove_connections(graph)
+    graph = utils.get_asymmetric_graph(graph, cities)
+    graph = utils.remove_connections(graph)
 
     start_time = time()
-    graph_search_heurictic(graph, Heuristic.n_average_heuristic)
+    cost = graph_search_heurictic(graph, Heuristic.n_average_heuristic)
+    # cost, returns, path = graph_search_heurictic(graph, Heuristic.n_average_heuristic)
     end_time = time()
-    print(f"{(end_time - start_time):0.6f} seconds")
+    print(f"Cost: {cost} | solved in {(end_time - start_time):0.6f} seconds")
+    # print(f"Cost: {cost} | {returns:4d} steps | solved in {(end_time - start_time):0.6f} seconds")
+    # print(path)
     print()
     start_time = time()
-    graph_search_heurictic(graph, Heuristic.n_min_cost_heuristic)
+    cost = graph_search_heurictic(graph, Heuristic.n_min_cost_heuristic)
+    # cost, returns, path = graph_search_heurictic(graph, Heuristic.n_min_cost_heuristic)
     end_time = time()
-    print(f"{(end_time - start_time):0.6f} seconds")
+    print(f"Cost: {cost} | solved in {(end_time - start_time):0.6f} seconds")
+    # print(f"Cost: {cost} | {returns:4d} steps | solved in {(end_time - start_time):0.6f} seconds")
+    # print(path)
