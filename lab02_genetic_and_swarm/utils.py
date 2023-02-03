@@ -13,7 +13,8 @@ def load_data():
         time = cols[i+1]
         
         task = tuple((resource[j], time[j]) for j in range(len(resource)))
-        tasks[f"job_{i//2 + i%2 + 1}"] = task
+        tasks[i//2 + i%2] = task
+        # tasks[f"job_{i//2 + i%2 + 1}"] = task
 
     df = pd.DataFrame(tasks)
     return df
