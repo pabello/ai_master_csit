@@ -1,0 +1,21 @@
+Zadanie 4. Image processing with TensorFlow. Classifying digits.
+
+Part 1. Tensor Flow neural network.
+Normalize the image data (pixel colors) - divide values by 255.
+Useful TF functions:
+* M = Sequential()
+* Flatten() (flatten the image to get a vector with needed values only)
+* Dense() (can include the activation function but that may be used in the next layer)
+* We can add 3 Dense() layers. The last one should give an output of one of the 10 classes (digits)
+* m.compile(optimizer, loss, metric)Optimizer - could be ADAM or ADAMAX for example, but ADAM is slightly more advised. 
+Loss - could be a mean square error, but since it is a classification problem it’s not a very good choice. 
+Better one will be „Categorical cross entropy” or Sparse categorical cross entropy, basically any function
+with cross entropy will be okay.Metric - we use accuracy metric AC = correct predictions / total predictions * 100%
+* m.fit()
+* Dropout layer might be useful. Its function is to break connections. 
+For random 10% of outputs will be omitted in the forward pass.
+
+Part 2. Auto-encoder
+28 x 28
+Layers dimensionality goes down to a certain value and then the same amount of layers grow to the initial dimensionality.
+The input and the output in training process is the same for auto encoders.

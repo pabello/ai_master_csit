@@ -74,6 +74,7 @@ class MultilayerPerceptron:
             for size in layer_sizes:
                 # self.weights.append(np.random.uniform(size=(size, previous_layer_neurons), low=-1, high=1))
                 self.weights.append(np.random.normal(size=(size, previous_layer_neurons), loc=0.0, scale=0.5))
+                # self.weights.append(np.random.randn(size, previous_layer_neurons))
                 self.biases.append(np.matrix(np.zeros(size)).T)
                 previous_layer_neurons = size
                 self.filename += str(size) + '.'
