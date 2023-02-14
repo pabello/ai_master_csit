@@ -7,36 +7,67 @@ from copy import deepcopy
 from random import seed
 
 
-class Heuristic(Enum):
-    def n_average_heuristic(state:list, total_cities_number:int):
-        cost_so_far = state[1]  # this already includes the cost for a step that is being processed
-        steps_done = len(state[0][1:])
+# class Heuristic(Enum):
+#     def n_average_heuristic(state:list, total_cities_number:int):
+#         cost_so_far = state[1]  # this already includes the cost for a step that is being processed
+#         steps_done = len(state[0][1:])
         
+#         steps_left = total_cities_number - steps_done  # this includes the way back to the first city
+#         average_cost = cost_so_far / steps_done
+#         return steps_left * average_cost
+
+#     def n_min_cost_heuristic(state:list, total_cities_number:int, global_min:float):
+#         min_cost = min(step[1] for step in state[0][1:])  # we need to skip the first city as its cost is 0
+#         steps_done = len(state[0][1:])
+        
+#         steps_left = total_cities_number - steps_done
+#         # return steps_left * min_cost
+#         return steps_left * global_min
+
+
+class Heuristic(Enum):
+    def n_average_heuristic(state:list, step_costs:list, total_cities_number:int):
+        try:
+            average_cost = sum(step_costs) / len(step_costs)
+        except ZeroDivisionError:
+            return 0
+        steps_done = len(state[0][1:])        
         steps_left = total_cities_number - steps_done  # this includes the way back to the first city
-        average_cost = cost_so_far / steps_done
         return steps_left * average_cost
 
-    def n_min_cost_heuristic(state:list, total_cities_number:int, global_min:float):
-        min_cost = min(step[1] for step in state[0][1:])  # we need to skip the first city as its cost is 0
+    def n_min_cost_heuristic(state:list, step_costs:list, total_cities_number:int):
+        # print(f"{len(state[0])}/{total_cities_number} --> {step_costs}")
+        try:
+            min_cost = min(step_costs)
+        except ValueError:
+            return 0
         steps_done = len(state[0][1:])
-        
         steps_left = total_cities_number - steps_done
-        # return steps_left * min_cost
-        return steps_left * global_min
+        return steps_left * min_cost
+
+
+def get_possible_steps(state: list, space: np.array):
+    current_node = state[0][-1][0]
+    visited_nodes = [node[0] for node in state[0]]
+    possible_steps = [node for node in range(space.shape[0]) if node not in visited_nodes and space[current_node][node] != 0]
+    step_costs = [space[visited_nodes[-1]][x] for x in possible_steps]
+    return possible_steps, step_costs
 
 
 def get_child_states(state: list, space: np.array, heuristic:Heuristic) -> list:
     children = []
-    current_node = state[0][-1][0]
-    visited_nodes = [node[0] for node in state[0]]
-    possible_steps = [node for node in range(space.shape[0]) if node not in visited_nodes and space[current_node][node] != 0]
+    # current_node = state[0][-1][0]
+    # visited_nodes = [node[0] for node in state[0]]
+    # possible_steps = [node for node in range(space.shape[0]) if node not in visited_nodes and space[current_node][node] != 0]
+    # step_costs = [space[visited_nodes[-1]][x] for x in possible_steps]
+    possible_steps, step_costs = get_possible_steps(state, space)
     
-    for x in possible_steps:
-        step_cost = space[visited_nodes[-1]][x]
+    for child, step_cost in zip(possible_steps, step_costs):
         child_state = deepcopy(state)
-        child_state[0].append( (x, step_cost) )
+        child_state[0].append( (child, step_cost) )
+        _, child_step_costs = get_possible_steps(child_state, space)
         child_state[1] += step_cost
-        child_state[2] = child_state[1] + heuristic(child_state, space.shape[0])
+        child_state[2] = child_state[1] + heuristic(child_state, child_step_costs, space.shape[0])
         children.append(child_state)
     return children
 
@@ -55,8 +86,8 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
         while len(state_queue):
             best_state = state_queue.pop(0)
             if len(best_state[0]) > space.shape[0]:
-                if best_state[2] <= best_state[1]:
-                    print("estimation was better")
+                # if best_state[2] <= best_state[1]:
+                #     print("estimation was better")
                 if not best_solution or best_state[1] < best_solution[1]:
                     best_solution = deepcopy(best_state)
                 break
@@ -74,7 +105,7 @@ def graph_search_heurictic(space:np.ndarray, heuristic:Heuristic):
                 state_queue += child_states
                 return_count += 1
             state_queue.sort(key=lambda state:state[2])
-    print(return_count)
+    # print(return_count)
     return best_solution[1] if isinstance(best_solution, list) else "Unsolvable"
     # return best_solution[1], return_count, [city[0] for city in best_solution[0]] if isinstance(best_solution, list) else "Unsolvable"
     

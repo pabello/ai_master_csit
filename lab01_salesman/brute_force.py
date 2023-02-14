@@ -65,12 +65,26 @@ def quiet_find_solutions(space: np.array, order: OrderType):
     solutions = []
     
     while solution_space:
-        child_paths = utils.get_child_paths(solution_space.pop(take_index), space)
-        if child_paths:
-            if len(child_paths) == 1 and len(child_paths[0][0]) > space.shape[0]:
-                solutions.append(child_paths[0])
-            else:
-                solution_space += child_paths
+        current_state = solution_space.pop(take_index)
+        # print(current_state)
+        child_paths = utils.get_child_paths(current_state, space)
+        if child_paths:  # unvisited cities
+            # if len(child_paths) == 1 and len(child_paths[0][0]) > space.shape[0]:
+            #     solutions.append(child_paths[0])
+            # else:
+            solution_space += child_paths
+        else:  # no available cities (possibly all visited already)
+            # print(current_state)
+            if len(current_state[0]) == space.shape[0]:
+                back_cost = space[current_state[0][-1]][current_state[0][0]]
+                if back_cost > 0:
+                    current_state[1] += back_cost
+                    current_state[0].append(current_state[0][0])
+                    # print("-----------")
+                    # print(current_state)
+                    # print("-----------")
+                    # exit()
+                    solutions.append(current_state)
     return solutions
 
 
@@ -156,14 +170,23 @@ def brute_force(space:np.ndarray):
     s_time = time()
     solutions = quiet_find_solutions(space, OrderType.DFS)
     e_time = time()
-    dfs_best_cost = sorted(solutions, key=lambda x: x[1])[0][1]
+    dfs_best_solution = sorted(solutions, key=lambda x: x[1])[0]
+    dfs_best_cost = dfs_best_solution[1]
     dfs_time = e_time - s_time
 
     s_time = time()
     solutions = quiet_find_solutions(space, OrderType.BFS)
     e_time = time()
-    bfs_best_cost = sorted(solutions, key=lambda x: x[1])[0][1]
+    bfs_best_solution = sorted(solutions, key=lambda x: x[1])[0]
+    bfs_best_cost = bfs_best_solution[1]
     bfs_time = e_time - s_time
+    
+    # dcost = [space[dfs_best_solution[0][i-1]][dfs_best_solution[0][i]] for i in range(1, len(dfs_best_solution[0]))]
+    # bcost = [space[bfs_best_solution[0][i-1]][bfs_best_solution[0][i]] for i in range(1, len(bfs_best_solution[0]))]
+    
+    # print(f"{dfs_best_solution} | real_cost: {dcost}")
+    # print(f"{bfs_best_solution} | real_cost: {bcost}")
+    # print()
 
     return {"dfs":(dfs_best_cost, dfs_time), "bfs":(bfs_best_cost, bfs_time)}
 

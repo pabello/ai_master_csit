@@ -128,16 +128,14 @@ def get_child_paths(state: list, space: np.array) -> list:
     children = []
     possible_steps = [_ for _ in range(space.shape[0]) if _ not in state[0]]
     if not possible_steps:
-        if len(state[0]) == space.shape[0]:
-            state[1] += space[state[0][-1]][state[0][0]]
-            state[0].append(state[0][0])
-            return [state]
         return None
     for x in possible_steps:
-        child_state = deepcopy(state)
-        child_state[0].append(x)
-        child_state[1] += space[state[0][-1]][x]
-        children.append(child_state)
+        step_cost = space[state[0][-1]][x]
+        if step_cost > 0:
+            child_state = deepcopy(state)
+            child_state[0].append(x)
+            child_state[1] += step_cost
+            children.append(child_state)
     return children
 
 
