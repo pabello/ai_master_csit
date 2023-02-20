@@ -2,15 +2,15 @@ import pandas as pd
 import numpy as np
 
 from random import choices, shuffle, randint, seed
-from copy import deepcopy
 from sklearn.model_selection import train_test_split
 
 from torch.utils.data import DataLoader, TensorDataset
-from torch import nn, tensor, float32, FloatTensor, BoolTensor, where, gt
-import torch.optim as optimizers
+from torch import nn, tensor, float32
 from torchmetrics.classification import BinaryAccuracy
 
-import utils
+import torch.optim as optimizers
+import plotly.express as px
+
 
 
 EPOCHS = 100
@@ -81,6 +81,7 @@ if __name__ == "__main__":
     # 1 Convolutional + 1 Dense
     model = nn.Sequential(
         nn.Conv1d(in_channels=4, out_channels=1, kernel_size=5),
+        nn.Flatten(),
         nn.Linear(in_features=11, out_features=1),
         nn.Sigmoid()
     )
@@ -107,7 +108,7 @@ if __name__ == "__main__":
             optimizer.zero_grad()  # clear the optimizer state
             accuracy_function.zero_grad()
             
-            outputs = model(inputs_batch).squeeze(2)
+            outputs = model(inputs_batch)#.squeeze(2)
             loss = loss_function(outputs, labels_batch)
             loss.backward()  # backpropagation
             optimizer.step()  # updates the weights
@@ -117,7 +118,7 @@ if __name__ == "__main__":
             print('Epoch [{}/{}], Loss: {:.4f}, Accuracy: {:.2f}'.format(epoch+1, EPOCHS, loss.item(), accuracy.item()))
     
     print()
-    test_outputs = model(test_data).squeeze(2)
+    test_outputs = model(test_data)#.squeeze(2)
     test_loss = loss_function(test_outputs, test_labels)
     test_accuracy = accuracy_function(test_outputs, test_labels)
     print('Testing the model | Loss: {:.4f}, Accuracy: {:.2f}'.format(test_loss.item(), test_accuracy.item()))
@@ -125,3 +126,6 @@ if __name__ == "__main__":
     
     kernels = list(model.children())[0].weight.cpu().detach().clone()
     print(kernels)
+    fig = px.imshow(kernels[0], text_auto=True)
+    fig.update_coloraxes(showscale=True, colorscale="Greys")
+    fig.show()
