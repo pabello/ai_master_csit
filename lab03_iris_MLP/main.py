@@ -135,6 +135,7 @@ class MultilayerPerceptron:
                 weight_changes, bias_changes = self.backpropagate(prediction, reference)
                 error += sum((prediction - reference) ** 2)
                 
+                # With batching
                 for layer in range(len(self.weights)):
                     weight_changes_sum[layer] = weight_changes_sum[layer] + weight_changes[layer]
                     bias_changes_sum[layer] = bias_changes_sum[layer] + bias_changes[layer]
@@ -147,7 +148,7 @@ class MultilayerPerceptron:
                         bias_changes_sum[layer] *= 0
                     sample_counter = 0
                 
-                # # Weights and biases as list of matrixes
+                # # Without batching
                 # for i in range(len(self.weights)):
                 #     # These two cannot utilize the short notation -= due to type incompatibility
                 #     self.weights[i] = self.weights[i] + weight_changes[i] * self.learning_factor

@@ -43,10 +43,6 @@ def fitness(jobs_order:list[int], dataset:pd.DataFrame):
     return max(job_timers.values())
 
 
-# def get_crossover_cycle(parent_1:list[int], parent_2:list[int], starting_index:int):
-    
-
-
 def crossover(parent_1_source:list[int], parent_2_source:list[int]) -> tuple[tuple[int], tuple[int]]:
     task_count = len(parent_1_source)
     

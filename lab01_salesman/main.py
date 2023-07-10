@@ -11,7 +11,7 @@ with open("results.md", "w") as file:
     file.write(f"|------------|----------|-----------------|-----------|----------|------|\n")
 
 seed(6)
-min_cities = 9
+min_cities = 5
 max_cities = 9
 for dimmension in range(min_cities, max_cities + 1):
     cities = utils.generate_cities(dimmension)

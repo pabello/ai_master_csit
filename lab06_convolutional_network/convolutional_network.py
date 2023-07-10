@@ -2,6 +2,10 @@ from tensorflow import keras, reshape
 
 # Loading the dataset
 (x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()
+print(type(y_train))
+print()
+print(y_train)
+exit()
 
 # Normalizing data and one-hot encoding labels
 x_train = reshape(x_train.astype('float32') / 255, (-1, 28, 28, 1))
